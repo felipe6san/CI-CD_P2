@@ -21,4 +21,6 @@ app.listen(port, () => {
   console.log(`Listening http://localhost:${port}`);
 });
 
+console.log('macarrao')
+
 module.exports = app;
