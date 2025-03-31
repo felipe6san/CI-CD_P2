@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 Linha modificada na develop
+=======
+Linha modificada na feature.
+>>>>>>> feature/primeiro-conflito
