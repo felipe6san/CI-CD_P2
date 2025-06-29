@@ -1,1 +1,0 @@
-Linha modificada na develop e na feature, combinadas em um único texto!

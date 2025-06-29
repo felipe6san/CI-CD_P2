@@ -1,10 +1,12 @@
-name: gitActions
+name: CI/CD Workflow
 
 on:
   push:
     branches: 
       - main
       - develop
+      - 'feature/**'
+      - 'hotfix/**'
   pull_request:
     branches: 
       - main
@@ -20,6 +22,20 @@ jobs:
       with:
         fetch-depth: 0
         token: ${{ secrets.GH_TOKEN }}
+
+    - name: Login no Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Criar a imagem Docker
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/3011392323022-integracao_ci_cd-fatec:${{ github.run_number }} .
+
+    - name: Push para o Docker Hub
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/3011392323022-integracao_ci_cd-fatec:${{ github.run_number }}
     
     - name: Set up Node.js
       uses: actions/setup-node@v3
