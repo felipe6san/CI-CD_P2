@@ -2,30 +2,14 @@
 const request = require('supertest');
 const app = require('../src/index');
 
-describe('GET /api', () => {
-  it('should return Hello world!', async () => {
-    const res = await request(app).get('/api');
+describe('GET /users', () => {
+  it('should return a list of users', async () => {
+    const res = await request(app).get('/users');
     expect(res.statusCode).toEqual(200);
-    expect(res.text).toBe('Hello world!');
+    expect(Array.isArray(res.body)).toBe(true);
   });
 });
 
-describe('GET /api/test', () => {
-  it('should return a test message', async () => {
-    const res = await request(app).get('/api/test');
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty('message', 'Endpoint de teste');
-  });
-});
+console.log('Iniciando os testes...');
 
-/*
-describe('GET /api/test', () => {
-  it('should return a test message', async () => {
-    const res = await request(app).get('/api/test-2');
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty('message', 'Endpoint de teste 2');
-  });
-});
-*/
-
-jest.setTimeout(30000); 
+jest.setTimeout(30000);
