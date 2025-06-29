@@ -36,7 +36,7 @@ const swaggerOptions = {
       description: 'CRUD de usuários com MySQL'
     }
   },
-  apis: ['server.js']
+  apis: ['./src/index.js']
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
