@@ -17,7 +17,8 @@
   "author": "Fatec Votorantim - DSM",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.21.0"
+    "express": "^4.21.0",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
