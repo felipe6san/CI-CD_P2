@@ -189,11 +189,11 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{
               "envVars": [
-                {"key":"DB_HOST","value":"${{ secrets.DB_HOST }}"},
-                {"key":"DB_USER","value":"${{ secrets.DB_USER }}"},
-                {"key":"DB_PASSWORD","value":"${{ secrets.DB_PASSWORD }}"},
-                {"key":"DB_NAME","value":"${{ secrets.DB_NAME }}"},
-                {"key":"DB_PORT","value":"${{ secrets.DB_PORT }}"}
+                {"key":"POSTGRES_HOST","value":"${{ secrets.POSTGRES_HOST }}"},
+                {"key":"POSTGRES_USER","value":"${{ secrets.POSTGRES_USER }}"},
+                {"key":"POSTGRES_PASSWORD","value":"${{ secrets.POSTGRES_PASSWORD }}"},
+                {"key":"POSTGRES_DB","value":"${{ secrets.POSTGRES_DB }}"},
+                {"key":"POSTGRES_PORT","value":"${{ secrets.POSTGRES_PORT }}"}
               ]
             }'
 
