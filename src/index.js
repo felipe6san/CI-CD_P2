@@ -8,12 +8,12 @@ const port = 5200;
 const app = express();
 app.use(express.json());
 
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_HOSTUSER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT
+const db = new Pool({
+  host: process.env.POSTGRES_HOST,
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  database: process.env.POSTGRES_DB,
+  port: process.env.POSTGRES_PORT
 });
 
 db.connect(err => {
