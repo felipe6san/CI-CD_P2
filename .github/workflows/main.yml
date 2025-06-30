@@ -57,12 +57,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           git fetch --tags
-          LAST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          LAST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
           if [ -z "$LAST_TAG" ]; then
             LAST_TAG="v0.0.0"
+            COMMITS=$(git log --pretty=format:"%s")
+          else
+            COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"%s")
           fi
           echo "Última tag: $LAST_TAG"
-          COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"%s")
           MAJOR=0
           MINOR=0
           PATCH=0
