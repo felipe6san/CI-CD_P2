@@ -5,6 +5,10 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const port = 5200;
 
+const { Logtail } = require("@logtail/node");
+
+const logtail = new Logtail(process.env.LOGTAIL_TOKEN);
+
 const app = express();
 app.use(express.json());
 
@@ -23,9 +27,9 @@ db.query(`
     email VARCHAR(255)
   )
 `).then(() => {
-  console.log('Conectado ao PostgreSQL!');
+  logtail.info('Conectado ao PostgreSQL!');
 }).catch(err => {
-  console.error('Erro ao conectar ao PostgreSQL:', err);
+  logtail.error('Erro ao conectar ao PostgreSQL:', err);
 });
 
 const swaggerOptions = {
@@ -57,7 +61,7 @@ app.get('/users', async (req, res) => {
     const { rows } = await db.query('SELECT * FROM users');
     res.json(rows);
   } catch (err) {
-    console.error('Erro ao buscar usuários:', err);
+    logtail.error('Erro ao buscar usuários:', err);
     res.status(500).json({ error: 'Erro ao buscar usuários', details: err.message });
   }
 });
@@ -170,14 +174,14 @@ app.delete('/users/:id', async (req, res) => {
 app.get('/mensagem', (req, res) => {
   res.send(process.env.APP_MESSAGE || 'Mensagem padrão');
   if(process.env.NODE_ENV === 'development') {
-    console.log(`Segredo de dev: ${process.env.JWT_SECRET}`);
+    logtail.info(`Segredo de dev: ${process.env.JWT_SECRET}`);
   }
 });
 
 if (require.main === module) {
   app.listen(port, () => {
-    console.log(`Servidor rodando em http://localhost:${port}`);
-    console.log(`Swagger em http://localhost:${port}/swagger`);
+    logtail.info(`Servidor rodando em http://localhost:${port}`);
+    logtail.info(`Swagger em http://localhost:${port}/swagger`);
   });
 }
 
