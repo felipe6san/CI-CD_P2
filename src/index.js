@@ -18,8 +18,7 @@ const db = new Pool({
   port: process.env.POSTGRES_PORT
 });
 
-const logtail = new Logtail(process.env.BETTER_STACK_LOGS);
-logtail.attachConsole();
+const logtail = new Logtail(process.env.LOGTAIL_TOKEN);
 
 db.query(`
   CREATE TABLE IF NOT EXISTS users (
