@@ -107,9 +107,13 @@ jobs:
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
           git add package.json
-          git commit -m "chore(release): version ${{ env.new_version }}"
-          git tag v${{ env.new_version }}
-          git push origin main --tags
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(release): version ${{ env.new_version }}"
+            git tag v${{ env.new_version }}
+            git push origin main --tags
+          else
+            echo "Nenhuma alteração para commit/tag. Pulando push."
+          fi
 
       - name: Send email on failure
         if: failure()
