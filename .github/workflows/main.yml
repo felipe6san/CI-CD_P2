@@ -2,13 +2,13 @@ name: CI/CD Workflow
 
 on:
   push:
-    branches: 
+    branches:
       - main
       - develop
       - 'feature/**'
       - 'hotfix/**'
   pull_request:
-    branches: 
+    branches:
       - main
       - develop
 
@@ -109,8 +109,20 @@ jobs:
           git add package.json
           if ! git diff --cached --quiet; then
             git commit -m "chore(release): version ${{ env.new_version }}"
-            git tag v${{ env.new_version }}
+            echo "Commit criado: chore(release): version ${{ env.new_version }}"
+
+            # --- INÍCIO DA MUDANÇA ---
+            # Verifica se a tag já existe antes de tentar criá-la
+            if git rev-parse "v${{ env.new_version }}" >/dev/null 2>&1; then
+              echo "Tag v${{ env.new_version }} já existe. Pulando criação de tag."
+            else
+              git tag "v${{ env.new_version }}"
+              echo "Tag v${{ env.new_version }} criada."
+            fi
+            # --- FIM DA MUDANÇA ---
+
             git push origin main --tags
+            echo "Push para origin main --tags concluído."
           else
             echo "Nenhuma alteração para commit/tag. Pulando push."
           fi
