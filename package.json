@@ -1,6 +1,6 @@
 {
   "name": "api-exemplo",
-  "version": "0.1.1",
+  "version": "0.1.0",
   "description": "Exemplo de API NodeJs para teste de uma pipeline CI",
   "main": "src/index.js",
   "scripts": {
@@ -18,8 +18,10 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.0",
-    "dotenv": "^16.4.5",
-    "mysql2": ""
+    "dotenv": "^16.0.3",
+    "mysql2": "^3.3.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
