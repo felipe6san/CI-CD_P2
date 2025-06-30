@@ -18,7 +18,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.0",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "mysql2": ""
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
