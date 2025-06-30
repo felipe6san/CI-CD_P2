@@ -153,12 +153,12 @@ jobs:
 
       - name: Criar a imagem Docker
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/3011392323022-integracao_ci_cd-fatec:${{ env.new_version }} .
-          docker tag ${{ secrets.DOCKER_USERNAME }}/3011392323022-integracao_ci_cd-fatec:${{ env.new_version }} ${{ secrets.DOCKER_USERNAME }}/3011392323022-integracao_ci_cd-fatec:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/3011392323022-integracao_ci_cd-fatec:${{ env.IMAGE_VERSION }} .
+          docker tag ${{ secrets.DOCKER_USERNAME }}/3011392323022-integracao_ci_cd-fatec:${{ env.IMAGE_VERSION }} ${{ secrets.DOCKER_USERNAME }}/3011392323022-integracao_ci_cd-fatec:latest
 
       - name: Push para o Docker Hub
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/3011392323022-integracao_ci_cd-fatec:${{ env.new_version }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/3011392323022-integracao_ci_cd-fatec:${{ env.IMAGE_VERSION }}
           docker push ${{ secrets.DOCKER_USERNAME }}/3011392323022-integracao_ci_cd-fatec:latest
 
       - name: Atualizar variáveis/secrets no Render
