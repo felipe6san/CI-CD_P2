@@ -16,15 +16,16 @@ const db = new Pool({
   port: process.env.POSTGRES_PORT
 });
 
-db.connect(err => {
-  if (err) throw err;
-  console.log('Conectado ao MySQL!');
-  db.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      name VARCHAR(255),
-      email VARCHAR(255)
-    )`);
+db.query(`
+  CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    email VARCHAR(255)
+  )
+`).then(() => {
+  console.log('Conectado ao PostgreSQL!');
+}).catch(err => {
+  console.error('Erro ao conectar ao PostgreSQL:', err);
 });
 
 const swaggerOptions = {
