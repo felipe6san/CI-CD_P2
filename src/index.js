@@ -1,13 +1,15 @@
 require('dotenv').config();
-
 const express = require('express');
 const { Pool } = require('pg');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-const port = 5200;
 const { Logtail } = require("@logtail/node");
 
+const port = process.env.PORT || 5200;
+
 const app = express();
+const logtail = new Logtail(process.env.LOGTAIL_TOKEN);
+
 app.use(express.json());
 
 const db = new Pool({
@@ -18,8 +20,6 @@ const db = new Pool({
   port: process.env.POSTGRES_PORT
 });
 
-const logtail = new Logtail(process.env.LOGTAIL_TOKEN);
-
 db.query(`
   CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -28,10 +28,10 @@ db.query(`
   )
 `).then(() => {
   console.log('Conectado ao PostgreSQL!');
-  logtail.info("Servidor iniciado!");
+  logtail.info("Conexão com o PostgreSQL estabelecida com sucesso.");
 }).catch(err => {
-  console.error('Erro ao conectar ao PostgreSQL:', err);
-  logtail.error("Erro ao conectar ao banco", { error: err });
+  console.error('Erro ao conectar ou criar tabela no PostgreSQL:', err);
+  logtail.error("Falha ao conectar ou criar tabela no PostgreSQL", { error: err.message });
 });
 
 const swaggerOptions = {
@@ -40,7 +40,7 @@ const swaggerOptions = {
     info: {
       title: 'User API',
       version: '1.0.0',
-      description: 'CRUD de usuários com PostgreSQL'
+      description: 'API para CRUD de usuários com Node.js e PostgreSQL'
     }
   },
   apis: ['./src/index.js']
@@ -49,157 +49,78 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-/**
- * @swagger
- * /users:
- *   get:
- *     summary: Lista todos os usuários
- *     responses:
- *       200:
- *         description: Lista de usuários
- */
 app.get('/users', async (req, res) => {
   try {
-    const { rows } = await db.query('SELECT * FROM users');
+    const { rows } = await db.query('SELECT * FROM users ORDER BY id ASC');
     res.json(rows);
-    logtail.info('Listou usuários', { quantidade: rows.length });
+    logtail.info('Listagem de usuários realizada', { quantidade: rows.length });
   } catch (err) {
     console.error('Erro ao buscar usuários:', err);
-    logtail.error('Erro ao buscar usuários', { error: err });
-    res.status(500).json({ error: 'Erro ao buscar usuários', details: err.message });
+    logtail.error('Erro ao buscar usuários', { error: err.message });
+    res.status(500).json({ error: 'Erro interno ao buscar usuários' });
   }
 });
 
-/**
- * @swagger
- * /users:
- *   post:
- *     summary: Cria um novo usuário
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [name, email]
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *     responses:
- *       201:
- *         description: Usuário criado
- */
 app.post('/users', async (req, res) => {
   const { name, email } = req.body;
   try {
     const result = await db.query('INSERT INTO users (name, email) VALUES ($1, $2) RETURNING id', [name, email]);
-    res.status(201).json({ id: result.rows[0].id, name, email });
-    logtail.info('Usuário criado', { id: result.rows[0].id, name, email });
+    const newUser = { id: result.rows[0].id, name, email };
+    res.status(201).json(newUser);
+    logtail.info('Usuário criado com sucesso', { user: newUser });
   } catch (err) {
     console.error('Erro ao criar usuário:', err);
-    logtail.error('Erro ao criar usuário', { error: err });
-    res.status(500).send(err);
+    logtail.error('Erro ao criar usuário', { error: err.message });
+    res.status(500).json({ error: 'Erro interno ao criar usuário' });
   }
 });
 
-/**
- * @swagger
- * /users/{id}:
- *   put:
- *     summary: Atualiza um usuário
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *     responses:
- *       200:
- *         description: Usuário atualizado
- */
 app.put('/users/:id', async (req, res) => {
+  const { id } = req.params;
   const { name, email } = req.body;
   try {
-    await db.query('UPDATE users SET name = $1, email = $2 WHERE id = $3', [name, email, req.params.id]);
-    res.json({ id: req.params.id, name, email });
-    logtail.info('Usuário atualizado', { id: req.params.id, name, email });
+    await db.query('UPDATE users SET name = $1, email = $2 WHERE id = $3', [name, email, id]);
+    const updatedUser = { id, name, email };
+    res.json(updatedUser);
+    logtail.info('Usuário atualizado com sucesso', { user: updatedUser });
   } catch (err) {
     console.error('Erro ao atualizar usuário:', err);
-    logtail.error('Erro ao atualizar usuário', { error: err });
-    res.status(500).send(err);
+    logtail.error('Erro ao atualizar usuário', { error: err.message });
+    res.status(500).json({ error: 'Erro interno ao atualizar usuário' });
   }
 });
 
-/**
- * @swagger
- * /users/{id}:
- *   delete:
- *     summary: Remove um usuário
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       204:
- *         description: Usuário removido
- */
 app.delete('/users/:id', async (req, res) => {
+  const { id } = req.params;
   try {
-    await db.query('DELETE FROM users WHERE id = $1', [req.params.id]);
+    await db.query('DELETE FROM users WHERE id = $1', [id]);
     res.status(204).send();
-    logtail.info('Usuário removido', { id: req.params.id });
+    logtail.info('Usuário removido com sucesso', { userId: id });
   } catch (err) {
     console.error('Erro ao remover usuário:', err);
-    logtail.error('Erro ao remover usuário', { error: err });
-    res.status(500).send(err);
+    logtail.error('Erro ao remover usuário', { error: err.message });
+    res.status(500).json({ error: 'Erro interno ao remover usuário' });
   }
 });
 
-/**
- * @swagger
- * /mensagem:
- *   get:
- *     summary: Retorna uma mensagem personalizada
- *     responses:
- *       200:
- *         description: Mensagem personalizada
- *         content:
- *           text/plain:
- *             schema:
- *               type: string
- *               example: Fatec DSM
- */
 app.get('/mensagem', (req, res) => {
-  res.send(process.env.APP_MESSAGE || 'Mensagem padrão');
-  logtail.info('Endpoint /mensagem acessado', { mensagem: process.env.APP_MESSAGE || 'Mensagem padrão' });
-  if(process.env.NODE_ENV === 'development') {
-    console.log(`Segredo de dev: ${process.env.JWT_SECRET}`);
-    logtail.info('Segredo de dev acessado', { segredo: process.env.JWT_SECRET });
-  }
+  const message = process.env.APP_MESSAGE || 'Mensagem padrão';
+  res.send(message);
+  logtail.info('Endpoint /mensagem acessado', { mensagem: message });
 });
 
 if (require.main === module) {
   app.listen(port, () => {
-    if (process.env.NODE_ENV === 'development') {
-      logtail.info(`Servidor rodando em http://localhost:${port}`);
-      logtail.info(`Swagger em http://localhost:${port}/swagger`);
-    } else {
-      logtail.info('Servidor rodando em ambiente de produção');
+    const environment = process.env.NODE_ENV || 'não definido';
+    const message = `Servidor iniciado e ouvindo na porta ${port}. Ambiente: ${environment}`;
+    
+    console.log(message);
+    logtail.info(message);
+
+    if (environment === 'development') {
+      const swaggerMessage = `Swagger UI disponível em http://localhost:${port}/swagger`;
+      console.log(swaggerMessage);
+      logtail.info(swaggerMessage);
     }
   });
 }
